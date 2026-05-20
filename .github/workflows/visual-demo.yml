@@ -1,0 +1,36 @@
+name: Visual Demo Pipeline
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build a visual summary
+        run: |
+          cat <<'EOF' >> "$GITHUB_STEP_SUMMARY"
+          # Flash Group Visual Demo
+
+          - Audience: fintech students
+          - Theme: clean pipeline visibility
+          - Result: easy to read success signal
+
+          EOF
+
+          printf '%s\n' '========================================'
+          printf '%s\n' '   FLASH GROUP VISUAL PIPELINE ONLINE   '
+          printf '%s\n' '========================================'
+          echo "Visual demo step completed."
+
+      - name: Emit workflow notice
+        run: echo "::notice title=Visual Pipeline::The job summary above is the visual confirmation for this demo."

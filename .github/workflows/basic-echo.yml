@@ -1,0 +1,28 @@
+name: Basic Echo Pipeline
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  echo:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Say hello
+        run: |
+          echo "Flash Group basic pipeline is running."
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref_name }}"
+
+      - name: Show success
+        run: |
+          echo "Everything passed in the simplest possible way."
+          echo "This is the baseline example for students."
