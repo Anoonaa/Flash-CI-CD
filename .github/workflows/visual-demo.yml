@@ -9,19 +9,19 @@ permissions:
   contents: read
 
 jobs:
-  visual:
+  build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build a visual summary
+      - name: Build stage summary
         run: |
           cat <<'EOF' >> "$GITHUB_STEP_SUMMARY"
           # Flash Group Visual Demo
 
-          ## Quality gate flow
+          ## Build stage
 
           ```mermaid
           flowchart LR
@@ -33,19 +33,69 @@ jobs:
 
           | Stage | Signal | What it means |
           | --- | --- | --- |
-          | Build | green | the demo compiles cleanly |
-          | Gate 1 | green | the first quality check passes |
-          | Gate 2 | green | the next gate confirms the visual |
-          | Ship | ready | the workflow is good to publish |
+          | Build | green | the pipeline starts cleanly |
+          | Gate 1 | waiting | the first gate only runs after build |
+          | Gate 2 | waiting | the second gate depends on Gate 1 |
+          | Ship | waiting | the final job closes the pipeline |
 
           Build → Gate 1 → Gate 2 → Ship
 
           EOF
 
-          printf '%s\n' '========================================'
-          printf '%s\n' '   FLASH GROUP VISUAL PIPELINE ONLINE   '
-          printf '%s\n' '========================================'
-          echo "Visual demo step completed."
+  quality_gate_1:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Gate 1 check
+        run: |
+          test -f package.json
+          test -f README.md
+
+      - name: Gate 1 summary
+        run: |
+          cat <<'EOF' >> "$GITHUB_STEP_SUMMARY"
+          ## Quality gate 1
+
+          Build is complete and the repository still has the files the demo needs.
+
+          Build → Gate 1 ✅
+          EOF
+
+  quality_gate_2:
+    needs: quality_gate_1
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Gate 2 check
+        run: |
+          test -f .github/workflows/playwright-visual.yml
+          test -f tests/example.spec.ts
+
+      - name: Gate 2 summary
+        run: |
+          cat <<'EOF' >> "$GITHUB_STEP_SUMMARY"
+          ## Quality gate 2
+
+          The visual gate is tied to the Playwright smoke check and the test suite.
+
+          Build → Gate 1 → Gate 2 ✅
+          EOF
+
+  ship:
+    needs: quality_gate_2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Final ship summary
+        run: |
+          cat <<'EOF' >> "$GITHUB_STEP_SUMMARY"
+          ## Ship stage
+
+          The pipeline is finished and all gates have passed.
+
+          Build → Gate 1 → Gate 2 → Ship ✅
+          EOF
 
       - name: Emit workflow notice
-        run: echo "::notice title=Visual Pipeline::The job summary above is the visual confirmation for this demo."
+        run: echo "::notice title=Visual Pipeline::The chained jobs form the actual gate for this demo."
