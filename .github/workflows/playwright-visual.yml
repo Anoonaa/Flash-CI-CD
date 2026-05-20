@@ -40,9 +40,23 @@ jobs:
           cat <<'EOF' >> "$GITHUB_STEP_SUMMARY"
           # Playwright Smoke Check
 
-          - Checks the Flash Group demo page
-          - Clicks the transaction button
-          - Saves a screenshot in test-results/flash-group-home.png
+          ## Visual gate flow
+
+          ```mermaid
+          flowchart LR
+              A[Build] --> B[Browser Gate]
+              B --> C[Visual Check]
+              C --> D[Artifact Upload]
+          ```
+
+          | Stage | Signal | What it means |
+          | --- | --- | --- |
+          | Build | green | the React app bundles successfully |
+          | Browser Gate | green | Chromium opens the demo page |
+          | Visual Check | green | the button click and screenshot pass |
+          | Artifact Upload | ready | the report is saved for review |
+
+          Build → Browser Gate → Visual Check → Artifact Upload
 
           EOF
 

@@ -21,9 +21,24 @@ jobs:
           cat <<'EOF' >> "$GITHUB_STEP_SUMMARY"
           # Flash Group Visual Demo
 
-          - Audience: fintech students
-          - Theme: clean pipeline visibility
-          - Result: easy to read success signal
+          ## Quality gate flow
+
+          ```mermaid
+          flowchart LR
+              A[Checkout] --> B[Build]
+              B --> C[Quality Gate 1]
+              C --> D[Quality Gate 2]
+              D --> E[Ship]
+          ```
+
+          | Stage | Signal | What it means |
+          | --- | --- | --- |
+          | Build | green | the demo compiles cleanly |
+          | Gate 1 | green | the first quality check passes |
+          | Gate 2 | green | the next gate confirms the visual |
+          | Ship | ready | the workflow is good to publish |
+
+          Build → Gate 1 → Gate 2 → Ship
 
           EOF
 
